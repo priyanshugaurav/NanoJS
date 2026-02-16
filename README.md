@@ -2,10 +2,6 @@
 
 A custom JavaScript interpreter built from scratch in C++! This project implements a working JavaScript runtime that can execute modern JavaScript features including async/await, promises, classes, and more.
 
-![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=c%2B%2B&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-![Status](https://img.shields.io/badge/Status-Active-green)
-
 ## ✨ Features
 
 - **Modern JavaScript Support**
