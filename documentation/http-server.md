@@ -89,6 +89,47 @@ const server = http.createServer((req, res) => {
 });
 ```
 
+**req.headers** - Request headers with lowercased keys:
+```javascript
+const server = http.createServer((req, res) => {
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Origin:', req.headers['origin']);
+  console.log('Authorization:', req.headers['authorization']);
+  res.end('OK');
+});
+```
+
+**req.body** - Request body string (buffered according to Content-Length):
+```javascript
+const server = http.createServer((req, res) => {
+  if (req.method === 'POST') {
+    let payload = JSON.parse(req.body);
+    console.log('Received submission:', payload);
+  }
+  res.end('OK');
+});
+```
+
+### Response Headers, Status Codes & CORS Preflight
+
+**res.setHeader() & res.writeHead():**
+```javascript
+const server = http.createServer((req, res) => {
+  // Handle CORS OPTIONS preflight
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.statusCode = 204;
+    return res.end();
+  }
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ success: true }));
+});
+```
+
 ### Example: Log Requests
 
 ```javascript

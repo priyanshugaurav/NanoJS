@@ -805,4 +805,66 @@ isFinite(Infinity); // false
 
 ---
 
+## Process & Environment Variables
+
+NanoJS provides global access to system environment variables and process runtime details via `process` and `env`.
+
+### Accessing Environment Variables
+```javascript
+// Access via process.env (object property)
+let apiKey = process.env.RESEND_API_KEY;
+let port = process.env.PORT || 8080;
+
+// Access via env.get(key)
+let dbUrl = env.get("DATABASE_URL");
+
+console.log("Platform:", process.platform); // "darwin", "linux", or "win32"
+console.log("Version:", process.version);   // "v1.0.0"
+```
+
+### Exiting the Process
+```javascript
+process.exit(0); // Exit with success
+process.exit(1); // Exit with error code
+```
+
+---
+
+## Fetch API (HTTPS & HTTP)
+
+NanoJS provides global `fetch(url, options)` supporting full HTTPS with TLS:
+
+```javascript
+// GET request
+let res = await fetch("https://api.github.com/users/octocat");
+console.log("Status:", res.status); // 200
+console.log("OK:", res.ok);         // true
+
+let data = await res.json();
+console.log("User:", data.login);
+
+// POST request with headers and body
+let sendEmail = await fetch("https://api.resend.com/emails", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer " + process.env.RESEND_API_KEY,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    from: "onboarding@resend.dev",
+    to: "delivered@resend.dev",
+    subject: "Hello from NanoJS",
+    html: "<p>Congrats on sending your first email with NanoJS!</p>"
+  })
+});
+
+console.log("Resend Status:", sendEmail.status);
+if (sendEmail.ok) {
+  let responseData = await sendEmail.json();
+  console.log("Email ID:", responseData.id);
+}
+```
+
+---
+
 Next: [Async Programming →](async-programming.md)

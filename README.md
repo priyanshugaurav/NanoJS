@@ -151,7 +151,7 @@ Next tick: 12
 
 ## Running Tests
 
-An automated test suite is provided in `scripts/test_engine.py`. It runs all 19 language test suites against the C++ engine:
+An automated test suite is provided in `scripts/test_engine.py`. It runs all 20 language test suites against the C++ engine:
 
 ```bash
 python3 scripts/test_engine.py
@@ -178,6 +178,7 @@ Test coverage includes:
 - `test_18_modules.mjs`: `import` and `export` statements
 - `test_19_errors.mjs`: Runtime error handling and call stack unwinding
 - `test_20_stress.mjs`: Heavy allocations and event loop throughput
+- `test_21_https_backend.mjs`: HTTPS `fetch(url, options)`, TLS, `process.env`, and `http.createServer` POST/CORS/body buffering
 
 ---
 
