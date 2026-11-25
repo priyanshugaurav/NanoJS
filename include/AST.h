@@ -1,7 +1,7 @@
 #pragma once
 #include "Forward.h"
 #include "Lexer.h"
-#include "Runtime/JSValue.h"
+#include "runtime/JSValue.h"
 #include <vector>
 #include <string>
 #include <memory>

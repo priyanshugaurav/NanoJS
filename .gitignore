@@ -12,6 +12,10 @@ compile_commands.json
 *.obj
 *.out
 *.exe
+nanojs
+build-bin/
+.clangd/
+.cache/
 *.dll
 *.so
 *.a

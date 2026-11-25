@@ -431,7 +431,7 @@ Interpreter::Interpreter() {
                     addr.sin_addr.s_addr = INADDR_ANY;
                     addr.sin_port = htons(port);
                     
-                    if (bind(serverSock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+                    if (::bind(serverSock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
                         CLOSE_SOCKET(serverSock);
                         return JSValue::makeUndefined();
                     }

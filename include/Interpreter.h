@@ -1,8 +1,8 @@
 #pragma once
 #include "Forward.h"
-#include "Runtime/Environment.h"
-#include "Runtime/JSValue.h"
-#include "Runtime/EventLoop.h"
+#include "runtime/Environment.h"
+#include "runtime/JSValue.h"
+#include "runtime/EventLoop.h"
 #include "AST.h"
 #include <set>
 #include <map>

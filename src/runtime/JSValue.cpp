@@ -1,4 +1,4 @@
-#include "../../include/Runtime/JSValue.h"
+#include "../../include/runtime/JSValue.h"
 #include "../../include/Interpreter.h"
 #include <cmath>
 #include <algorithm>
