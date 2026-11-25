@@ -6,6 +6,7 @@ export const PRESETS = [
     title: "1. Closures & Scope",
     badge: "Scope",
     description: "Shows how nested functions remember variables from outer scopes.",
+    output: `> Counter A (+5): 15\n> Counter A (+5): 20\n> Counter B (-25): 75\n> Counter A Current: 20\n> Counter B Current: 75`,
     code: `// NanoJS Closure & Lexical Scope Demo
 function createCounter(initialValue, step) {
     let count = initialValue;
@@ -40,6 +41,7 @@ console.log("Counter B Current:", counterB.get());
     title: "2. Async/Await & Event Loop",
     badge: "Async",
     description: "Shows setTimeout timers and Promise microtasks running in order.",
+    output: `> 1. Synchronous script start\n> 2. Inside async function\n> Script end (event loop running...)\n> 3. Promise resolved via await\n> 5. Timer 2 finished (0ms)\n> 4. Timer 1 finished (20ms)`,
     code: `// NanoJS Event Loop & Microtask Demo
 console.log("1. Synchronous script start");
 
@@ -66,6 +68,7 @@ console.log("Script end (event loop running...)");
     title: "3. Classes & Inheritance",
     badge: "OOP",
     description: "Shows ES6 class syntax, constructors, methods, and super calls.",
+    output: `> NanoGT running at 160 km/h\n> Nitro Boosted! NanoGT hit 240 km/h!\n> Vehicle brand: NanoGT\n> Current speed: 240`,
     code: `// NanoJS Object-Oriented System
 class Vehicle {
     constructor(brand, speed) {
@@ -103,6 +106,7 @@ console.log("Current speed:", gt.speed);
     title: "4. Arrays & Built-in Methods",
     badge: "Arrays",
     description: "Shows map, filter, and reduce working over arrays.",
+    output: `> Original:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n> Evens:     [2, 4, 6, 8, 10]\n> Squared:   [4, 16, 36, 64, 100]\n> Sum:       220`,
     code: `// NanoJS Array Processing
 let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -129,6 +133,7 @@ console.log("Sum:      ", sum);
     title: "5. Recursion & Call Stack",
     badge: "Stack",
     description: "Computes Fibonacci numbers with recursive function calls.",
+    output: `> Calculating Fibonacci numbers...\n> fib(0) = 0\n> fib(1) = 1\n> fib(2) = 1\n> fib(3) = 2\n> fib(4) = 3\n> fib(5) = 5\n> fib(6) = 8\n> fib(7) = 13\n> fib(8) = 21\n> fib(9) = 34\n> fib(10) = 55`,
     code: `// NanoJS Call Stack & Recursion
 function fibonacci(n) {
     if (n <= 1) return n;
@@ -146,6 +151,7 @@ for (let i = 0; i <= 10; i = i + 1) {
     title: "6. Error Handling & Try-Catch",
     badge: "Errors",
     description: "Catches thrown errors with try, catch, and finally blocks.",
+    output: `> Testing valid user...\n> Result: {"status":"Verified","age":25}\n> Testing invalid user...\n> Caught expected error: Age cannot be negative: -5\n> Finally block executed regardless of error!`,
     code: `// NanoJS Exception Handling
 function validateUser(age) {
     if (age < 0) {
