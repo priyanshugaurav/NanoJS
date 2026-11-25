@@ -349,10 +349,19 @@ unique_ptr<Expr> Parser::primary() {
         vector<pair<string, unique_ptr<Expr>>> properties;
         if (peek().type != T_RBRACE) {
             do {
-                JSToken key = consume(T_IDENTIFIER, "Expected property name");
+                string keyName;
+                if (match(T_STRING)) {
+                    keyName = previous().lexeme;
+                } else if (match(T_IDENTIFIER)) {
+                    keyName = previous().lexeme;
+                } else if (peek().type != T_COLON && peek().type != T_RBRACE && peek().type != T_COMMA && peek().type != T_EOF) {
+                    keyName = advance().lexeme;
+                } else {
+                    throw JSRuntimeError(peek().line, "SyntaxError", "Expected property name or string");
+                }
                 consume(T_COLON, "Expected ':'");
                 auto value = expression();
-                properties.push_back({key.lexeme, move(value)});
+                properties.push_back({keyName, move(value)});
             } while (match(T_COMMA));
         }
         consume(T_RBRACE, "Expected '}'");
