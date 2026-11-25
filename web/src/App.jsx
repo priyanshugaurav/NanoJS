@@ -559,7 +559,7 @@ export default function App() {
                 title="Click to view live C++ engine tests"
               >
                 <span className="spec-key">Tests</span>
-                <span className="spec-val spec-pass">19 of 19 Passing • Verified</span>
+                <span className="spec-val spec-pass">20 of 20 Passing • Verified</span>
               </button>
             </div>
           </section>
@@ -979,19 +979,73 @@ console.log("File content:", content);`}
                     output={`> File content: Saved with NanoJS!`}
                   />
 
-                  <h3 className="doc-subheading">2. HTTP Web Server (http)</h3>
-                  <p className="doc-prose">Create a web server listening on a port:</p>
+                  <h3 className="doc-subheading">2. HTTP Web Server (POST, Headers, Body & CORS)</h3>
+                  <p className="doc-prose">
+                    Full request parsing with lowercased <code>req.headers</code>, Content-Length buffered <code>req.body</code>, and <code>OPTIONS</code> CORS preflight handling:
+                  </p>
 
                   <CodeSnippet 
                     filename="server.mjs"
                     code={`let server = http.createServer(function(req, res) {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", engine: "NanoJS v1.0" }));
+    // 1. Handle CORS preflight
+    if (req.method === "OPTIONS") {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.statusCode = 204;
+        return res.end();
+    }
+
+    // 2. Handle POST submissions with JSON body
+    if (req.method === "POST" && req.url === "/submit") {
+        let payload = JSON.parse(req.body);
+        console.log("Received submission from:", payload.email);
+
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ status: "success", received: payload.email }));
+    }
+
+    res.writeHead(404);
+    res.end("Not Found");
 });
 
 server.listen(8080);
 console.log("Server listening at http://localhost:8080/");`}
                     output={`> Server listening at http://localhost:8080/`}
+                  />
+
+                  <h3 className="doc-subheading">3. HTTPS & Fetch API (Resend, Webhooks, APIs)</h3>
+                  <p className="doc-prose">
+                    Call HTTPS APIs with TLS, custom headers, request bodies, and read environment variables from <code>process.env</code>:
+                  </p>
+
+                  <CodeSnippet 
+                    filename="api_request.mjs"
+                    code={`let apiKey = process.env.RESEND_API_KEY || "re_test_123";
+
+let res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+        "Authorization": "Bearer " + apiKey,
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        from: "OrbitForm <onboarding@resend.dev>",
+        to: ["delivered@resend.dev"],
+        subject: "New Form Submission",
+        html: "<p>New contact form submission received!</p>"
+    })
+});
+
+console.log("Response status:", res.status);
+console.log("Response OK:", res.ok);
+
+if (res.ok) {
+    let data = await res.json();
+    console.log("Email dispatched ID:", data.id);
+}`}
+                    output={`> Response status: 200\n> Response OK: true\n> Email dispatched ID: 49a39f3b-0e3b-4f15-9d70-93cb10a2bb12`}
                   />
                 </div>
               )}

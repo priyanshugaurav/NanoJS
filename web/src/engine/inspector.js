@@ -50,6 +50,8 @@ export class ExecutionInspector {
           "Math": { type: "object", address: "0x7ffee4b10", isNative: true },
           "JSON": { type: "object", address: "0x7ffee4b28", isNative: true },
           "console": { type: "object", address: "0x7ffee4b40", isNative: true },
+          "process": { type: "object", address: "0x7ffee4b58", isNative: true },
+          "env": { type: "object", address: "0x7ffee4b70", isNative: true },
         }
       }
     ];
