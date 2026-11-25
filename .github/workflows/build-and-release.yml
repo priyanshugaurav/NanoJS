@@ -37,7 +37,8 @@ jobs:
       - name: Build on Linux
         if: runner.os == 'Linux'
         run: |
-          g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs
+          sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+          g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs -lcurl
           chmod +x nanojs
           ./nanojs examples/test_01_basics.mjs
           tar -czvf nanojs-v1.0.0-linux-x64.tar.gz nanojs
@@ -46,7 +47,7 @@ jobs:
       - name: Build on Windows
         if: runner.os == 'Windows'
         run: |
-          g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs.exe -lws2_32
+          g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs.exe -lws2_32 -lcurl || g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs.exe -lws2_32
           .\nanojs.exe examples/test_01_basics.mjs
           Compress-Archive -Path nanojs.exe -DestinationPath nanojs-v1.0.0-windows-x64.zip
 
@@ -54,8 +55,8 @@ jobs:
       - name: Build on macOS
         if: runner.os == 'macOS'
         run: |
-          clang++ -target arm64-apple-macos11 -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs-arm64
-          clang++ -target x86_64-apple-macos11 -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs-x64
+          clang++ -target arm64-apple-macos11 -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs-arm64 -lcurl
+          clang++ -target x86_64-apple-macos11 -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs-x64 -lcurl
           lipo -create -output nanojs nanojs-arm64 nanojs-x64
           chmod +x nanojs
           ./nanojs examples/test_01_basics.mjs
