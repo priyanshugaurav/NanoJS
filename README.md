@@ -1,240 +1,232 @@
-# Mini JavaScript Interpreter 🚀
+# NanoJS
 
-A custom JavaScript interpreter built from scratch in C++! This project implements a working JavaScript runtime that can execute modern JavaScript features including async/await, promises, classes, and more.
+A lightweight, standalone JavaScript runtime and interpreter written from scratch in modern C++17. Zero external dependencies — built strictly using the C++ standard library and OS networking primitives.
 
-## ✨ Features
-
-- **Modern JavaScript Support**
-  - Variables: `let`, `const`, `var`
-  - Functions: Regular, Arrow, Async
-  - Classes with inheritance
-  - Template literals
-  - Destructuring assignments
-
-- **Async Operations**
-  - Promises with `.then()` and `.catch()`
-  - `async/await` syntax
-  - Event loop implementation
-  - Timers: `setTimeout`, `setInterval`
-
-- **Built-in Objects & APIs**
-  - Console: `log`, `error`, `warn`
-  - Math object with common functions
-  - JSON: `parse` and `stringify`
-  - Date handling
-  - RegExp support
-  - Set and Map data structures
-
-- **File System Module**
-  - Read and write files
-  - Directory operations
-  - File existence checks
-
-- **HTTP Server**
-  - Create basic web servers
-  - Handle requests and responses
-
-- **Advanced Features**
-  - Module system (import/export)
-  - Try-catch error handling
-  - Array methods: map, filter, reduce, etc.
-  - String manipulation methods
-  - For-of loops
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- C++ compiler (GCC, Clang, or MSVC)
-- CMake (optional, for building)
-- Basic understanding of JavaScript
-
-### Building the Project
-
-**On Linux/Mac:**
-```bash
-g++ -std=c++17 -o mini_js src/Interpreter.cpp src/main.cpp -lpthread
-```
-
-**On Windows:**
-```bash
-g++ -std=c++17 -o mini_js.exe src/Interpreter.cpp src/main.cpp -lws2_32
-```
-
-### Running JavaScript Files
-
-```bash
-./mini_js examples/hello.mjs
-```
-
-**Note:** Files must use the `.mjs` extension!
-
-## 📖 Documentation
-
-Detailed documentation is available in the `/docs` folder:
-
-- [Language Features](docs/language-features.md) - JavaScript syntax supported
-- [Built-in Objects](docs/builtin-objects.md) - Console, Math, JSON, etc.
-- [Async Programming](docs/async-programming.md) - Promises and async/await
-- [Modules](docs/modules.md) - Import/export system
-- [File System API](docs/file-system.md) - Working with files
-- [HTTP Server](docs/http-server.md) - Creating web servers
-- [Examples](docs/examples.md) - Code samples and tutorials
-
-## 🎯 Quick Example
-
-```javascript
-// hello.mjs
-async function greet(name) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`Hello, ${name}!`);
-    }, 1000);
-  });
-}
-
-const message = await greet("World");
-console.log(message); // Prints after 1 second: Hello, World!
-```
-
-Run it:
-```bash
-./mini_js hello.mjs
-```
-
-## 🛠️ Project Structure
-
-```
-mini-js/
-├── src/
-│   ├── Interpreter.cpp    # Main interpreter implementation
-│   └── main.cpp           # Entry point
-├── examples/              # Sample JavaScript files
-├── docs/                  # Documentation
-├── build/                 # Build output
-└── README.md
-```
-
-## 🔧 How It Works
-
-The interpreter works in several stages:
-
-1. **Lexer** - Breaks source code into tokens
-2. **Parser** - Builds an Abstract Syntax Tree (AST)
-3. **Interpreter** - Executes the AST with runtime support
-4. **Event Loop** - Manages async operations
-
-## 📝 Supported JavaScript Syntax
-
-### Variables
-```javascript
-let x = 10;
-const name = "John";
-var oldStyle = true;
-```
-
-### Functions
-```javascript
-// Regular function
-function add(a, b) {
-  return a + b;
-}
-
-// Arrow function
-const multiply = (a, b) => a * b;
-
-// Async function
-async function fetchData() {
-  return await getData();
-}
-```
-
-### Classes
-```javascript
-class Animal {
-  constructor(name) {
-    this.name = name;
-  }
-  
-  speak() {
-    console.log(`${this.name} makes a sound`);
-  }
-}
-
-class Dog extends Animal {
-  speak() {
-    console.log(`${this.name} barks`);
-  }
-}
-```
-
-### Promises & Async/Await
-```javascript
-const promise = new Promise((resolve, reject) => {
-  setTimeout(() => resolve("Done!"), 1000);
-});
-
-promise.then(result => console.log(result));
-
-// Or with async/await
-const result = await promise;
-console.log(result);
-```
-
-## 🧪 Testing
-
-Run the test files in the `examples/` directory:
-
-```bash
-./mini_js examples/test_01_variables.mjs
-./mini_js examples/test_02_functions.mjs
-./mini_js examples/test_03_promises.mjs
-```
-
-## 🤝 Contributing
-
-This is a student project, but contributions are welcome! Feel free to:
-
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
-
-## 📚 Learning Resources
-
-If you're interested in building interpreters, check out:
-
-- **Crafting Interpreters** by Robert Nystrom
-- **Modern Compiler Implementation in C** by Andrew Appel
-- **Programming Language Pragmatics** by Michael Scott
-
-## ⚠️ Limitations
-
-This is an educational project with some limitations:
-
-- Not all JavaScript features are implemented
-- Performance is not optimized
-- Some edge cases may not be handled
-- Limited standard library compared to Node.js
-
-## 📄 License
-
-This project is created for educational purposes. Feel free to use it for learning!
-
-## 👨‍💻 Author
-
-Created as a learning project to understand:
-- How programming languages work
-- Lexical analysis and parsing
-- Runtime environments
-- Asynchronous programming models
-
-## 🙏 Acknowledgments
-
-Inspired by various interpreter tutorials and JavaScript specifications.
+- **Live Playground & Downloads:** [https://nanojs.priyanshugaurav.space](https://nanojs.priyanshugaurav.space)
+- **Repository:** [https://github.com/priyanshugaurav/NanoJS](https://github.com/priyanshugaurav/NanoJS)
 
 ---
 
-⭐ If you found this helpful for learning, please star the repository!
+## Overview
 
-**Questions?** Check out the [documentation](docs/) or open an issue!
+NanoJS is a educational and experimental JavaScript runtime designed to show how a language engine works under the hood:
+1. **Lexer (`src/Lexer.cpp`)**: Tokenizes raw source code into keyword, literal, identifier, and operator tokens.
+2. **Parser (`src/Parser.cpp`)**: Recursive-descent parser producing an Abstract Syntax Tree (AST).
+3. **Interpreter (`src/Interpreter.cpp`)**: AST tree-walk evaluator with lexical environment scope chains for closures.
+4. **Event Loop (`src/runtime/Eventloop.cpp`)**: Non-blocking microtask and macrotask scheduler for Promises, `setTimeout`, and async I/O.
+5. **Runtime System (`src/runtime/`)**: Value tagging (`JSValue`), prototype inheritance, and garbage collection simulation.
+
+---
+
+## Features
+
+- **Language Grammar**: `let`, `const`, `var`, closures, nested scopes, lexical `this`, arrow functions, ternary operators, template literals.
+- **Object-Oriented**: ES6 `class`, `constructor`, `extends`, `super`, and prototype method dispatch.
+- **Async Execution**: `async` / `await`, Promises (`.then`, `.catch`, `Promise.all`), `setTimeout`, `setInterval`.
+- **Standard Library**:
+  - `console.log`, `console.error`, `console.warn`, `console.dir`
+  - `Math` (`abs`, `floor`, `ceil`, `min`, `max`, `random`, `pow`, `sqrt`, `PI`, `E`)
+  - `JSON` (`parse`, `stringify`)
+  - `Array` methods (`push`, `pop`, `shift`, `unshift`, `map`, `filter`, `reduce`, `forEach`, `join`, `slice`, `indexOf`, `includes`)
+  - `String` methods (`slice`, `substring`, `toLowerCase`, `toUpperCase`, `trim`, `split`, `includes`, `replace`, `repeat`)
+  - `Map` & `Set` data structures
+  - `Date` & `RegExp` basic patterns
+- **System & I/O**:
+  - `fs.readFile`, `fs.writeFile`, `fs.appendFile`, `fs.existsSync`, `fs.unlinkSync`, `fs.mkdirSync`
+  - `http.createServer((req, res) => ...)` with request routing and socket lifecycle
+  - `fetch(url)` client implementation
+- **ES Modules**: `import` and `export` across `.mjs` files.
+
+---
+
+## Quick Start
+
+### 1. Download Prebuilt Binaries
+
+Prebuilt binaries are available from the website: [https://nanojs.priyanshugaurav.space](https://nanojs.priyanshugaurav.space)
+
+#### macOS (Universal: Apple Silicon & Intel)
+```bash
+curl -fsSL https://nanojs.priyanshugaurav.space/downloads/install.sh | bash
+```
+Or download manually:
+```bash
+curl -O https://nanojs.priyanshugaurav.space/downloads/nanojs-v1.0.0-macos-universal.tar.gz
+tar -xzf nanojs-v1.0.0-macos-universal.tar.gz
+sudo mv nanojs /usr/local/bin/
+```
+
+#### Linux (x86_64)
+```bash
+curl -fsSL https://nanojs.priyanshugaurav.space/downloads/install.sh | bash
+```
+
+#### Windows (x64 PowerShell)
+```powershell
+irm https://nanojs.priyanshugaurav.space/downloads/install.ps1 | iex
+```
+
+---
+
+### 2. Building from Source
+
+#### Prerequisites
+- C++17 compatible compiler (`clang++` 10+ or `g++` 9+)
+- (Optional) CMake 3.10+
+
+#### macOS
+```bash
+clang++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs
+```
+
+#### Linux
+```bash
+g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs
+```
+
+#### Windows (MinGW)
+```bash
+g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs.exe -lws2_32
+```
+
+#### Using CMake (Cross-Platform)
+```bash
+cmake -B build
+cmake --build build --config Release
+# Binary is in build/nanojs (or build/Release/nanojs.exe on Windows)
+```
+
+---
+
+## Running JavaScript Code
+
+NanoJS executes files with the `.mjs` extension:
+
+```bash
+./nanojs examples/test_01_basics.mjs
+```
+
+### Example: Async / Await with Closures
+
+Save as `counter.mjs`:
+```javascript
+function makeCounter(initial) {
+  let count = initial;
+  return {
+    increment: () => { count = count + 1; return count; },
+    get: () => count
+  };
+}
+
+async function run() {
+  const counter = makeCounter(10);
+  console.log("Initial count:", counter.get());
+  
+  await new Promise(resolve => setTimeout(resolve, 500));
+  console.log("After tick:", counter.increment());
+  console.log("Next tick:", counter.increment());
+}
+
+run();
+```
+
+Run with:
+```bash
+./nanojs counter.mjs
+```
+
+Output:
+```
+==================================================
+   NanoJS Interpreter v1.0                        
+   Running: counter.mjs
+==================================================
+
+Initial count: 10
+After tick: 11
+Next tick: 12
+```
+
+---
+
+## Running Tests
+
+An automated test suite is provided in `scripts/test_engine.py`. It runs all 19 language test suites against the C++ engine:
+
+```bash
+python3 scripts/test_engine.py
+```
+
+Test coverage includes:
+- `test_01_basics.mjs`: Variable declarations, arithmetic, types
+- `test_02_strings.mjs`: String prototype methods, concatenation, template literals
+- `test_03_arrays.mjs`: Array index access, manipulation
+- `test_04_array_methods.mjs`: `map`, `filter`, `reduce`, `forEach`, `join`
+- `test_05_objects.mjs`: Object literals, property getters/setters, prototypes
+- `test_06_functions.mjs`: Closures, recursion, default parameters
+- `test_07_control_flow.mjs`: `if`, `else`, `while`, `for`, `switch`, `for-of`
+- `test_08_math_conversion.mjs`: `Math` API and type coercions
+- `test_09_json_regexp_date.mjs`: `JSON.parse`, `JSON.stringify`, `Date`, `RegExp`
+- `test_10_set_map_errors.mjs`: `Set`, `Map`, `try/catch/finally`, `throw`
+- `test_11_promises_async.mjs`: `Promise`, `async/await`, chaining
+- `test_12_timers.mjs`: `setTimeout`, `setInterval`, timer cancellation
+- `test_13_filesystem.mjs`: `fs` reading, writing, unlinking
+- `test_14_edge_cases.mjs`: Complex scope shadowing, hoist semantics
+- `test_15_console_fetch.mjs`: `console` formatting and HTTP `fetch`
+- `test_16_http_extreme.mjs`: `http.createServer` socket stress test
+- `test_17_advanced_features.mjs`: Classes, inheritance, `super`
+- `test_18_modules.mjs`: `import` and `export` statements
+- `test_19_errors.mjs`: Runtime error handling and call stack unwinding
+- `test_20_stress.mjs`: Heavy allocations and event loop throughput
+
+---
+
+## Project Structure
+
+```
+nanojs/
+├── include/              # Public C++ header files
+│   ├── AST.h             # AST node class declarations
+│   ├── Forward.h         # Forward declarations & common typedefs
+│   ├── Interpreter.h     # Evaluation engine & environment coordinator
+│   ├── Lexer.h           # Token scanner
+│   ├── Parser.h          # Recursive-descent grammar parser
+│   ├── Utils.h           # Cross-platform socket and utility helpers
+│   └── runtime/          # Environment, JSValue, and EventLoop headers
+├── src/                  # Implementation files
+│   ├── Lexer.cpp
+│   ├── Parser.cpp
+│   ├── Interpreter.cpp
+│   ├── Utils.cpp
+│   ├── main.cpp          # CLI entry point
+│   └── runtime/
+│       ├── Environment.cpp # Lexical scope bindings
+│       ├── Eventloop.cpp   # Timer and microtask queues
+│       └── JSValue.cpp     # Dynamic value representation
+├── examples/             # 20 test and benchmark .mjs files
+├── documentation/        # Detailed technical documentation
+├── web/                  # Vite + React web playground and download center
+├── scripts/              # Verification & testing scripts
+└── CMakeLists.txt        # Cross-platform CMake build file
+```
+
+---
+
+## Documentation
+
+Full guides and API documentation:
+- [Language Features](documentation/language-features.md)
+- [Built-in Objects](documentation/builtin-objects.md)
+- [Async Programming](documentation/async-programming.md)
+- [File System API](documentation/file-system.md)
+- [HTTP Server](documentation/http-server.md)
+- [Modules (Import / Export)](documentation/modules.md)
+- [Quick Reference](documentation/quick-reference.md)
+- [Troubleshooting & FAQ](documentation/troubleshooting.md)
+- [Code Examples](documentation/examples.md)
+
+---
+
+## License
+
+MIT License. Free to use, modify, and distribute for educational or commercial purposes.
