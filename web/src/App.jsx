@@ -30,9 +30,14 @@ import {
   Monitor, 
   Apple,
   BookOpen,
-  GitCompare,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  Menu,
+  X,
+  FileText,
+  Globe,
+  FolderOpen,
+  HelpCircle
 } from 'lucide-react';
 import { PRESETS } from './engine/presets';
 import { ExecutionInspector } from './engine/inspector';
@@ -43,7 +48,8 @@ const CodeEditor = Editor.default || Editor;
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [previousView, setPreviousView] = useState('home');
-  const [docsTab, setDocsTab] = useState('differences');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [docsChapter, setDocsChapter] = useState('architecture');
 
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -160,8 +166,9 @@ export default function App() {
   };
 
   // Instant navigation remembering where user came from
-  const navigateTo = (view, presetId = null, docSection = null) => {
+  const navigateTo = (view, presetId = null, docChapter = null) => {
     setPreviousView(currentView);
+    setMobileMenuOpen(false);
     if (presetId) {
       const found = PRESETS.find(p => p.id === presetId);
       if (found) {
@@ -170,10 +177,18 @@ export default function App() {
         handleRunCode(found.code);
       }
     }
-    if (docSection) {
-      setDocsTab(docSection);
+    if (docChapter) {
+      setDocsChapter(docChapter);
     }
     setCurrentView(view);
+    window.scrollTo(0, 0);
+  };
+
+  const handleOpenInPlayground = (sampleCode) => {
+    setPreviousView(currentView);
+    setCode(sampleCode);
+    setCurrentView('playground');
+    handleRunCode(sampleCode);
     window.scrollTo(0, 0);
   };
 
@@ -253,71 +268,15 @@ export default function App() {
     { num: '03', label: 'Interpreter', file: 'Interpreter.cpp', desc: 'Walks the AST directly in C++, tracks scope chains with shared pointers, and drives the async event loop.' },
   ];
 
-  // Differences from Node.js (V8)
-  const nodeDifferences = [
-    {
-      id: 'extension',
-      title: 'File Extension (.mjs required)',
-      nano: 'Strictly requires .mjs extension (e.g. ./nanojs app.mjs).',
-      node: 'Accepts .js, .cjs, and .mjs files automatically.',
-      note: 'NanoJS treats all user code as modern modules with strict scoping.'
-    },
-    {
-      id: 'pipeline',
-      title: 'Execution Engine (AST vs Bytecode)',
-      nano: 'Direct AST tree-walk evaluation in C++ with zero bytecode.',
-      node: 'Ignition bytecode compiler + TurboFan JIT machine code compiler.',
-      note: 'NanoJS starts in ~2ms with zero warmup time, ideal for small scripts.'
-    },
-    {
-      id: 'memory',
-      title: 'Memory & Garbage Collection',
-      nano: 'C++ std::shared_ptr reference counting. Deallocated when ref count is 0.',
-      node: 'V8 Orinoco generational GC (New/Old space, mark-sweep-compact).',
-      note: 'NanoJS has deterministic cleanup with no background GC stop-the-world pauses.'
-    },
-    {
-      id: 'scopes',
-      title: 'Lexical Environments & Closures',
-      nano: 'Linked C++ Environment objects. Inner functions hold parent pointer.',
-      node: 'Heap-allocated Context slots created by V8 scope analysis.',
-      note: 'Direct representation of ECMAScript scope chaining specification.'
-    },
-    {
-      id: 'modules',
-      title: 'Core Module Loading',
-      nano: 'fs, http, and fetch are pre-bound global objects. No import needed.',
-      node: 'Requires require("fs") or import fs from "node:fs".',
-      note: 'You can write fs.readFile() or http.createServer() immediately in any file.'
-    },
-    {
-      id: 'classes',
-      title: 'Class System & Prototypes',
-      nano: 'Supports class, constructor, methods, extends, and super().',
-      node: 'Full prototype chain, instanceof, prototype mutation, private fields.',
-      note: 'NanoJS omits instanceof and private #field syntax to keep the parser simple.'
-    },
-    {
-      id: 'eventloop',
-      title: 'Event Loop & Concurrency',
-      nano: 'Single-threaded C++ timer queue with std::chrono and microtask queue.',
-      node: 'libuv multi-threaded thread pool (4 worker threads) with 6 phases.',
-      note: 'Lightweight deterministic event loop without thread pool overhead.'
-    },
-    {
-      id: 'networking',
-      title: 'Networking & HTTP Engine',
-      nano: 'Raw POSIX sockets (Winsock on Windows) with simple HTTP/1.1.',
-      node: 'llhttp parser, full HTTP/2, WebSockets, OpenSSL TLS/HTTPS.',
-      note: 'Zero external dependencies. Production SSL is handled by reverse proxies.'
-    },
-    {
-      id: 'footprint',
-      title: 'Binary Size & Startup RAM',
-      nano: 'Under 1 MB standalone binary. Under 4 MB RAM at startup.',
-      node: '80 to 100 MB binary with V8, OpenSSL, libuv. ~30 MB startup RAM.',
-      note: 'NanoJS compiles into a tiny single executable with zero external libraries.'
-    }
+  const docsChapters = [
+    { id: 'architecture', title: 'Engine Architecture', icon: <Cpu className="w-4 h-4" /> },
+    { id: 'purpose', title: 'Learning Purpose & Node.js', icon: <HelpCircle className="w-4 h-4" /> },
+    { id: 'language', title: 'Language Syntax', icon: <Code2 className="w-4 h-4" /> },
+    { id: 'builtins', title: 'Standard Library', icon: <Box className="w-4 h-4" /> },
+    { id: 'async', title: 'Async & Event Loop', icon: <Clock className="w-4 h-4" /> },
+    { id: 'fs', title: 'File System (fs)', icon: <FolderOpen className="w-4 h-4" /> },
+    { id: 'http', title: 'HTTP Web Server', icon: <Globe className="w-4 h-4" /> },
+    { id: 'examples', title: 'Runnable Code Examples', icon: <Terminal className="w-4 h-4" /> }
   ];
 
   return (
@@ -325,55 +284,108 @@ export default function App() {
 
       {/* Main Navbar (Home, Docs, Downloads) */}
       {(currentView === 'home' || currentView === 'downloads' || currentView === 'docs') && (
-        <nav className="navbar">
-          <div className="nav-inner">
-            <button onClick={() => navigateTo('home')} className="nav-brand">
-              <span className="brand-dot" />
-              <span className="brand-text">NanoJS</span>
-            </button>
+        <>
+          <nav className="navbar">
+            <div className="nav-inner">
+              <button onClick={() => navigateTo('home')} className="nav-brand">
+                <span className="brand-dot" />
+                <span className="brand-text">NanoJS</span>
+              </button>
 
-            <div className="nav-links">
+              {/* Desktop Navigation Links */}
+              <div className="nav-links">
+                <button 
+                  onClick={() => navigateTo('home')} 
+                  className={`nav-link-btn ${currentView === 'home' ? 'active' : ''}`}
+                >
+                  Overview
+                </button>
+                <button 
+                  onClick={() => navigateTo('docs')} 
+                  className={`nav-link-btn ${currentView === 'docs' ? 'active' : ''}`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Documentation</span>
+                </button>
+                <button 
+                  onClick={() => navigateTo('downloads')} 
+                  className={`nav-link-btn ${currentView === 'downloads' ? 'active' : ''}`}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Downloads</span>
+                </button>
+                <a href="https://github.com/priyanshugaurav/NanoJS" target="_blank" rel="noreferrer" className="nav-link">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Source</span>
+                </a>
+                <button onClick={() => navigateTo('playground')} className="nav-cta">
+                  Playground
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={toggleTheme} className="nav-icon-btn" title="Toggle theme">
+                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Mobile Header Bar */}
+              <div className="nav-mobile">
+                <button onClick={() => navigateTo('playground')} className="nav-mobile-btn">
+                  Playground
+                </button>
+                <button onClick={toggleTheme} className="nav-icon-btn" title="Toggle theme">
+                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+                <button 
+                  onClick={() => setMobileMenuOpen(prev => !prev)} 
+                  className="nav-hamburger-btn"
+                  title="Menu"
+                >
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          {/* Smooth Mobile Menu Drawer */}
+          {mobileMenuOpen && (
+            <div className="mobile-drawer">
               <button 
                 onClick={() => navigateTo('home')} 
-                className={`nav-link-btn ${currentView === 'home' ? 'active' : ''}`}
+                className={`mobile-drawer-item ${currentView === 'home' ? 'active' : ''}`}
               >
-                Overview
+                <Code2 className="w-4 h-4" />
+                <span>Overview</span>
               </button>
               <button 
-                onClick={() => navigateTo('docs', null, 'differences')} 
-                className={`nav-link-btn ${currentView === 'docs' && docsTab === 'differences' ? 'active' : ''}`}
+                onClick={() => navigateTo('docs')} 
+                className={`mobile-drawer-item ${currentView === 'docs' ? 'active' : ''}`}
               >
-                <GitCompare className="w-3.5 h-3.5" />
-                <span>Node Differences</span>
-              </button>
-              <button 
-                onClick={() => navigateTo('docs', null, 'quickstart')} 
-                className={`nav-link-btn ${currentView === 'docs' && docsTab !== 'differences' ? 'active' : ''}`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Docs</span>
+                <BookOpen className="w-4 h-4" />
+                <span>Documentation</span>
               </button>
               <button 
                 onClick={() => navigateTo('downloads')} 
-                className={`nav-link-btn ${currentView === 'downloads' ? 'active' : ''}`}
+                className={`mobile-drawer-item ${currentView === 'downloads' ? 'active' : ''}`}
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
                 <span>Downloads</span>
               </button>
-              <a href="https://github.com/priyanshugaurav/NanoJS" target="_blank" rel="noreferrer" className="nav-link">
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Source</span>
+              <a 
+                href="https://github.com/priyanshugaurav/NanoJS" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="mobile-drawer-item"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Source Code on GitHub</span>
               </a>
-              <button onClick={() => navigateTo('playground')} className="nav-cta">
-                Playground
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <button onClick={toggleTheme} className="nav-icon-btn" title="Toggle theme">
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <button onClick={() => navigateTo('playground')} className="mobile-drawer-cta">
+                <Play className="w-4 h-4 fill-current" />
+                <span>Open Live Playground</span>
               </button>
             </div>
-          </div>
-        </nav>
+          )}
+        </>
       )}
 
       {/* ============ HOME PAGE ============ */}
@@ -384,7 +396,7 @@ export default function App() {
           <section className={`hero ${heroVisible ? 'visible' : ''}`}>
             <div className="hero-badge">
               <Code2 className="w-3 h-3" />
-              <span>C++17 • Zero dependencies • Built from scratch</span>
+              <span>C++17 • Zero dependencies • Built for learning</span>
             </div>
             
             <h1 className="hero-title">
@@ -393,7 +405,7 @@ export default function App() {
             </h1>
 
             <p className="hero-subtitle">
-              I built NanoJS to understand how JavaScript works under the hood: lexing, parsing, scope chains, closures, and an event loop. All implemented in C++ without external libraries.
+              Built as an educational project to understand how JavaScript works under the hood: lexing, parsing, scope chains, closures, and an event loop in pure C++.
             </p>
 
             <div className="hero-actions">
@@ -401,9 +413,9 @@ export default function App() {
                 <span>Try it live</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
-              <button onClick={() => navigateTo('docs', null, 'differences')} className="btn-secondary">
-                <GitCompare className="w-4 h-4" />
-                <span>How it differs from Node.js</span>
+              <button onClick={() => navigateTo('docs')} className="btn-secondary">
+                <BookOpen className="w-4 h-4" />
+                <span>Read documentation</span>
               </button>
               <button onClick={() => navigateTo('downloads')} className="btn-secondary">
                 <Download className="w-4 h-4" />
@@ -412,23 +424,52 @@ export default function App() {
             </div>
           </section>
 
-          {/* Callout Card: Node.js Comparison Banner */}
+          {/* Educational Purpose Card */}
           <section className={`section-block ${heroVisible ? 'visible' : ''}`} style={{ transitionDelay: '0.1s' }}>
-            <div className="diff-intro-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h3 className="diff-intro-title">How does NanoJS compare to Node.js?</h3>
-                <p className="diff-intro-p">
-                  NanoJS is an AST-walking C++ interpreter with reference-counted scopes and global runtime objects, while Node.js uses V8's JIT bytecode and libuv.
-                </p>
+            <div className="edu-home-card">
+              <div className="edu-card-badge">Educational Project</div>
+              <h2 className="edu-card-title">Built for Fun and Learning</h2>
+              <p className="edu-card-desc">
+                NanoJS was created for fun and educational curiosity to explore how language interpreters actually work. It is not built to replace or compete with Node.js. If you already know JavaScript and Node.js, NanoJS feels familiar and intuitive:
+              </p>
+
+              <div className="edu-points-grid">
+                <div className="edu-point-item">
+                  <CheckCircle2 className="w-4 h-4 edu-point-check" />
+                  <span><strong>JavaScript syntax:</strong> Write regular modern JS with let, const, closures, and classes.</span>
+                </div>
+                <div className="edu-point-item">
+                  <CheckCircle2 className="w-4 h-4 edu-point-check" />
+                  <span><strong>Standard APIs:</strong> Familiar console.log, JSON parser, Math, and timers.</span>
+                </div>
+                <div className="edu-point-item">
+                  <CheckCircle2 className="w-4 h-4 edu-point-check" />
+                  <span><strong>Event loop:</strong> Non-blocking setTimeout and Promise microtasks run by C++.</span>
+                </div>
+                <div className="edu-point-item">
+                  <CheckCircle2 className="w-4 h-4 edu-point-check" />
+                  <span><strong>Zero dependencies:</strong> Under 1 MB single binary with instant 2ms startup.</span>
+                </div>
               </div>
-              <button 
-                onClick={() => navigateTo('docs', null, 'differences')} 
-                className="btn-primary"
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                <span>Read technical differences</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+
+              <div className="edu-card-actions">
+                <button 
+                  onClick={() => navigateTo('docs', null, 'purpose')} 
+                  className="btn-primary"
+                  style={{ padding: '8px 16px', fontSize: '13px' }}
+                >
+                  <span>Learn how it works</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => navigateTo('docs')} 
+                  className="btn-secondary"
+                  style={{ padding: '8px 16px', fontSize: '13px' }}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Full documentation</span>
+                </button>
+              </div>
             </div>
           </section>
 
@@ -518,11 +559,11 @@ export default function App() {
           <footer className="home-footer">
             <span>Built by Priyanshu Gaurav</span>
             <div className="footer-links">
-              <button onClick={() => navigateTo('docs', null, 'differences')} className="footer-link">Differences</button>
-              <span className="footer-dot">·</span>
               <button onClick={() => navigateTo('docs')} className="footer-link">Docs</button>
               <span className="footer-dot">·</span>
               <button onClick={() => navigateTo('playground')} className="footer-link">Playground</button>
+              <span className="footer-dot">·</span>
+              <button onClick={() => navigateTo('downloads')} className="footer-link">Downloads</button>
               <span className="footer-dot">·</span>
               <a href="https://github.com/priyanshugaurav/NanoJS" target="_blank" rel="noreferrer" className="footer-link">GitHub</a>
             </div>
@@ -531,409 +572,578 @@ export default function App() {
         </main>
       )}
 
-      {/* ============ DOCUMENTATION PAGE ============ */}
+      {/* ============ DETAILED DOCUMENTATION PAGE ============ */}
       {currentView === 'docs' && (
         <main className="docs-page">
-          <section className="docs-hero">
-            <div className="docs-badge">
+          <header className="docs-header">
+            <div className="docs-hero-badge">
               <BookOpen className="w-3.5 h-3.5" />
               <span>NanoJS v1.0.0 Documentation</span>
             </div>
-            
-            <h1 className="docs-title">Documentation & Engine Guide</h1>
-            <p className="docs-subtitle">
-              Learn how to write and run code on NanoJS, understand its built-in modules, and explore how it differs from Node.js (V8).
+            <h1 className="docs-main-title">Complete Technical Documentation</h1>
+            <p className="docs-main-subtitle">
+              Comprehensive reference and architecture guide for developers learning how JavaScript engines work under the hood.
             </p>
+          </header>
 
-            {/* Category Tabs */}
-            <div className="docs-tabs">
-              <button
-                onClick={() => setDocsTab('differences')}
-                className={`docs-tab ${docsTab === 'differences' ? 'active' : ''}`}
-              >
-                <GitCompare className="w-4 h-4" />
-                <span>Node.js Differences</span>
-              </button>
-              <button
-                onClick={() => setDocsTab('quickstart')}
-                className={`docs-tab ${docsTab === 'quickstart' ? 'active' : ''}`}
-              >
-                <Terminal className="w-4 h-4" />
-                <span>Quick Start</span>
-              </button>
-              <button
-                onClick={() => setDocsTab('language')}
-                className={`docs-tab ${docsTab === 'language' ? 'active' : ''}`}
-              >
-                <Code2 className="w-4 h-4" />
-                <span>Language Syntax</span>
-              </button>
-              <button
-                onClick={() => setDocsTab('async')}
-                className={`docs-tab ${docsTab === 'async' ? 'active' : ''}`}
-              >
-                <Clock className="w-4 h-4" />
-                <span>Async & Event Loop</span>
-              </button>
-              <button
-                onClick={() => setDocsTab('modules')}
-                className={`docs-tab ${docsTab === 'modules' ? 'active' : ''}`}
-              >
-                <Box className="w-4 h-4" />
-                <span>Built-in Globals</span>
-              </button>
-            </div>
-          </section>
+          <div className="docs-container">
+            
+            {/* Sidebar Navigation */}
+            <aside className="docs-sidebar">
+              {docsChapters.map((chap) => (
+                <button
+                  key={chap.id}
+                  onClick={() => setDocsChapter(chap.id)}
+                  className={`docs-nav-btn ${docsChapter === chap.id ? 'active' : ''}`}
+                >
+                  {chap.icon}
+                  <span>{chap.title}</span>
+                </button>
+              ))}
+            </aside>
 
-          {/* TAB 1: HOW NANOJS DIFFERS FROM NODE.JS (V8) */}
-          {docsTab === 'differences' && (
+            {/* Main Content Area */}
             <div className="docs-content">
-              <div className="diff-intro-card">
-                <h2 className="diff-intro-title">How NanoJS Differs from Node.js (V8)</h2>
-                <p className="diff-intro-p">
-                  Node.js is an enterprise JavaScript runtime built on Google's V8 engine and libuv. NanoJS is an educational, minimalist JavaScript engine built from scratch in C++17 with zero dependencies. Below is the exact technical breakdown of differences between the two engines.
-                </p>
-              </div>
+              
+              {/* CHAPTER 1: ARCHITECTURE */}
+              {docsChapter === 'architecture' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">How NanoJS Works Under the Hood</h2>
+                    <p className="docs-card-p">
+                      NanoJS executes modern JavaScript in pure standard C++17 across four clear, decoupled pipeline stages without any external compiler toolchains or virtual machines:
+                    </p>
 
-              {/* Technical Difference Cards */}
-              <div className="diff-grid">
-                {nodeDifferences.map((d) => (
-                  <div key={d.id} className="diff-card">
-                    <div className="diff-card-header">
-                      <h3 className="diff-card-title">{d.title}</h3>
-                      <span className="diff-tag-nano">NanoJS</span>
-                    </div>
-
-                    <div className="diff-row-comparison">
-                      <div className="diff-nano-val">
-                        <strong>NanoJS:</strong> {d.nano}
-                      </div>
-                      <div className="diff-node-val">
-                        <strong>Node.js:</strong> {d.node}
+                    <div className="docs-callout note">
+                      <Cpu className="w-4 h-4 docs-callout-icon" />
+                      <div className="docs-callout-text">
+                        <strong>Pipeline:</strong> Source Code (.mjs) → Lexer.cpp → Parser.cpp → Interpreter.cpp → EventLoop.cpp
                       </div>
                     </div>
 
-                    <div className="diff-note">{d.note}</div>
+                    <div className="docs-item-list">
+                      <div className="docs-item">
+                        <div className="docs-item-name">1. Lexical Analysis (Lexer.cpp & Lexer.h)</div>
+                        <p className="docs-item-desc">
+                          The lexer streams UTF-8 characters and categorizes them into tokens: keywords (<code>let</code>, <code>const</code>, <code>function</code>, <code>class</code>, <code>async</code>, <code>await</code>), identifier names, number literals, string literals, and binary operators.
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">2. Recursive Descent Parsing (Parser.cpp & AST.h)</div>
+                        <p className="docs-item-desc">
+                          Constructs an Abstract Syntax Tree (AST) using operator precedence parsing. Nodes represent declarations (<code>VariableDeclAST</code>), expressions (<code>BinaryExprAST</code>, <code>CallExprAST</code>), control flow (<code>IfStmtAST</code>, <code>WhileStmtAST</code>), and class hierarchies (<code>ClassDeclAST</code>).
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">3. Tree-Walk Interpreter (Interpreter.cpp)</div>
+                        <p className="docs-item-desc">
+                          Directly walks the AST in C++ and computes results. Dynamically typed values are represented by <code>JSValue</code> with types for Number, String, Boolean, Null, Undefined, Object, and Function.
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">4. Lexical Environments (Environment.cpp & Environment.h)</div>
+                        <p className="docs-item-desc">
+                          Scopes are chained objects wrapped in <code>std::shared_ptr&lt;Environment&gt;</code>. When a function is declared, it captures a shared pointer to its enclosing environment, giving first-class closures without garbage collector pauses.
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">5. Event Loop & Microtasks (EventLoop.cpp)</div>
+                        <p className="docs-item-desc">
+                          Coordinates async execution using a monotonic timer priority queue (<code>std::chrono</code>) for <code>setTimeout</code> and a FIFO microtask queue for Promises and <code>await</code> resumption.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Side by Side Comparison Table */}
-              <div className="diff-table-card">
-                <h3 className="docs-card-title" style={{ marginBottom: '16px' }}>Side-by-Side Engine Comparison</h3>
-                <table className="diff-table">
-                  <thead>
-                    <tr>
-                      <th>Feature</th>
-                      <th>NanoJS Engine</th>
-                      <th>Node.js (V8)</th>
-                      <th>Why NanoJS does this</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="table-feature">File Extension</td>
-                      <td><code>.mjs</code> required</td>
-                      <td><code>.js</code>, <code>.cjs</code>, <code>.mjs</code></td>
-                      <td>Explicit ES module semantics from start</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Architecture</td>
-                      <td>Direct AST Tree Walk in C++</td>
-                      <td>Ignition Bytecode + TurboFan JIT</td>
-                      <td>Simple transparent C++ codebase, ~2ms boot</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Memory Management</td>
-                      <td>C++ <code>shared_ptr</code> reference counting</td>
-                      <td>V8 Orinoco Generational Mark-Sweep GC</td>
-                      <td>Instant cleanup when ref count drops to 0</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Core Modules</td>
-                      <td>Pre-bound globals (<code>fs</code>, <code>http</code>)</td>
-                      <td>Requires <code>require()</code> or <code>import</code></td>
-                      <td>Zero module loader resolution overhead</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Classes</td>
-                      <td><code>class</code>, <code>extends</code>, <code>super()</code></td>
-                      <td>Full prototypes, <code>instanceof</code>, private fields</td>
-                      <td>Clean OOP without prototype mutation quirks</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Event Loop</td>
-                      <td>Single-thread monotonic timer queue</td>
-                      <td>libuv multi-threaded thread pool (6 phases)</td>
-                      <td>Predictable single-threaded execution</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Networking</td>
-                      <td>Raw POSIX / Winsock HTTP/1.1</td>
-                      <td>llhttp + TLS/HTTPS + WebSockets + HTTP/2</td>
-                      <td>Zero external crypto/network dependencies</td>
-                    </tr>
-                    <tr>
-                      <td className="table-feature">Binary Size</td>
-                      <td>Under 1 MB</td>
-                      <td>Around 80 to 100 MB</td>
-                      <td>Lightweight standalone CLI executable</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="docs-card">
-                <h3 className="docs-card-title">When should you use NanoJS vs Node.js?</h3>
-                <p className="docs-card-p">
-                  Use <strong>Node.js</strong> for production web backends, npm packages, high-throughput microservices, and applications needing npm dependencies or TLS encryption.
-                </p>
-                <p className="docs-card-p" style={{ margin: 0 }}>
-                  Use <strong>NanoJS</strong> when you want an instant-starting embedded JavaScript interpreter, lightweight CLI utilities without a 100MB runtime, or to learn how compilers, lexers, parsers, and event loops work in C++.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: QUICK START */}
-          {docsTab === 'quickstart' && (
-            <div className="docs-content">
-              <div className="docs-card">
-                <h2 className="docs-card-title">Installing NanoJS</h2>
-                <p className="docs-card-p">
-                  Install NanoJS on macOS, Linux, or Windows with a single terminal command.
-                </p>
-
-                <div className="docs-code-block">
-                  <div className="docs-code-header">
-                    <span>macOS / Linux (Bash)</span>
-                    <button 
-                      onClick={() => handleCopySnippet('curl -fsSL https://nanojs.priyanshugaurav.space/downloads/install.sh | bash', 'doc-mac-inst')}
-                      className="docs-code-copy"
-                    >
-                      {copiedSnippet === 'doc-mac-inst' ? <Check className="w-3 h-3 text-green" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedSnippet === 'doc-mac-inst' ? 'Copied' : 'Copy'}</span>
-                    </button>
+                  <div className="docs-card">
+                    <h3 className="docs-card-title">Project Directory Structure</h3>
+                    <p className="docs-card-p">The C++ repository is organized cleanly:</p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>nanojs/ directory</span></div>
+                      <pre className="docs-code-pre">{`nanojs/
+├── include/
+│   ├── AST.h               # Abstract Syntax Tree node definitions
+│   ├── Lexer.h             # Tokenizer state and token enums
+│   ├── Parser.h            # Grammar parsing rules
+│   ├── Interpreter.h       # AST evaluation engine
+│   └── runtime/
+│       ├── JSValue.h       # Dynamic value tagging
+│       ├── Environment.h   # Scope chains & closures
+│       └── EventLoop.h     # Non-blocking async coordinator
+├── src/
+│   ├── Lexer.cpp
+│   ├── Parser.cpp
+│   ├── Interpreter.cpp
+│   ├── main.cpp            # CLI entry point
+│   └── runtime/
+│       ├── Environment.cpp
+│       ├── EventLoop.cpp
+│       ├── BuiltinObjects.cpp
+│       └── HTTPServer.cpp
+└── web/                    # React web studio & online playground`}</pre>
+                    </div>
                   </div>
-                  <pre className="docs-code-pre">curl -fsSL https://nanojs.priyanshugaurav.space/downloads/install.sh | bash</pre>
                 </div>
+              )}
 
-                <div className="docs-code-block">
-                  <div className="docs-code-header">
-                    <span>Windows (PowerShell)</span>
-                    <button 
-                      onClick={() => handleCopySnippet('irm https://nanojs.priyanshugaurav.space/downloads/install.ps1 | iex', 'doc-win-inst')}
-                      className="docs-code-copy"
-                    >
-                      {copiedSnippet === 'doc-win-inst' ? <Check className="w-3 h-3 text-green" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedSnippet === 'doc-win-inst' ? 'Copied' : 'Copy'}</span>
-                    </button>
+              {/* CHAPTER 2: EDUCATIONAL PURPOSE & NODE.JS */}
+              {docsChapter === 'purpose' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">Educational Purpose & Node.js Guide</h2>
+                    <div className="docs-callout note">
+                      <Info className="w-4 h-4 docs-callout-icon" />
+                      <div className="docs-callout-text">
+                        <strong>Friendly Note:</strong> NanoJS was built as a passion project for fun and educational learning. It is not designed to replace or compete with production engines like Node.js, Deno, or Bun.
+                      </div>
+                    </div>
+
+                    <p className="docs-card-p">
+                      Node.js is an industrial-scale runtime powered by Google's V8 engine, written over millions of lines of code with JIT compilation, multi-threading via libuv, and full ECMAScript standards.
+                    </p>
+                    <p className="docs-card-p">
+                      NanoJS, by contrast, is a tiny ~1 MB educational engine created to demystify how programming languages work. It shows that you don't need a massive team to understand and implement a working JavaScript interpreter in C++.
+                    </p>
                   </div>
-                  <pre className="docs-code-pre">irm https://nanojs.priyanshugaurav.space/downloads/install.ps1 | iex</pre>
-                </div>
-              </div>
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">Running Your First Script</h2>
-                <p className="docs-card-p">
-                  Create a file with the <code>.mjs</code> extension and run it using the <code>nanojs</code> binary.
-                </p>
+                  <div className="docs-card">
+                    <h3 className="docs-card-title">How Writing Code in NanoJS Compares to Node.js</h3>
+                    <div className="docs-item-list">
+                      <div className="docs-item">
+                        <div className="docs-item-name">1. Syntax You Already Know</div>
+                        <p className="docs-item-desc">
+                          If you know JavaScript, you can immediately write code for NanoJS. Variables, if/else, for loops, functions, closures, classes, and async/await work exactly as you expect.
+                        </p>
+                      </div>
 
-                <div className="docs-code-block">
-                  <div className="docs-code-header">
-                    <span>hello.mjs</span>
+                      <div className="docs-item">
+                        <div className="docs-item-name">2. Built-in Utilities</div>
+                        <p className="docs-item-desc">
+                          Just like Node.js, you have <code>console.log()</code>, <code>JSON.stringify()</code>, <code>JSON.parse()</code>, and <code>Math</code> functions built in.
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">3. Global File System & HTTP APIs</div>
+                        <p className="docs-item-desc">
+                          In Node.js, you import <code>fs</code> and <code>http</code> using <code>require()</code> or <code>import</code>. In NanoJS, <code>fs</code> and <code>http</code> are conveniently pre-bound globals, so you can call <code>fs.readFile()</code> or <code>http.createServer()</code> directly in your script.
+                        </p>
+                      </div>
+
+                      <div className="docs-item">
+                        <div className="docs-item-name">4. Execution Method</div>
+                        <p className="docs-item-desc">
+                          While Node.js compiles code to bytecode and native machine instructions using V8, NanoJS directly evaluates Abstract Syntax Tree nodes in C++. This means NanoJS starts up in ~2ms with under 4MB of RAM.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <pre className="docs-code-pre">{`// hello.mjs
-let greeting = "Hello from NanoJS!";
-console.log(greeting);
-
-let sum = [10, 20, 30].reduce(function(a, b) {
-    return a + b;
-}, 0);
-
-console.log("Calculated sum:", sum);`}</pre>
                 </div>
+              )}
 
-                <p className="docs-card-p">Run it from your terminal:</p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>Terminal</span></div>
-                  <pre className="docs-code-pre">nanojs hello.mjs</pre>
-                </div>
-              </div>
-            </div>
-          )}
+              {/* CHAPTER 3: LANGUAGE SYNTAX */}
+              {docsChapter === 'language' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">Language Syntax Reference</h2>
+                    <p className="docs-card-p">
+                      NanoJS supports modern ECMAScript semantics including block scoping, closures, classes, and error handling.
+                    </p>
 
-          {/* TAB 3: LANGUAGE SYNTAX */}
-          {docsTab === 'language' && (
-            <div className="docs-content">
-              <div className="docs-card">
-                <h2 className="docs-card-title">Variables and Types</h2>
-                <p className="docs-card-p">
-                  NanoJS supports block-scoped <code>let</code> and <code>const</code> variables, as well as Numbers, Strings, Booleans, Objects, and Arrays.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>variables.mjs</span></div>
-                  <pre className="docs-code-pre">{`let name = "NanoJS";
-const version = 1.0;
-let isNative = true;
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '20px 0 8px' }}>1. Variables & Scopes (let, const)</h3>
+                    <p className="docs-card-p">
+                      Variables declared with <code>let</code> are mutable, while <code>const</code> variables cannot be reassigned. Both obey block scoping.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header">
+                        <span>variables.mjs</span>
+                        <div className="docs-code-actions">
+                          <button onClick={() => handleCopySnippet(`let counter = 1;\nconst step = 5;\ncounter = counter + step;\nconsole.log("Counter:", counter);`, 'c-var')} className="docs-code-btn">
+                            {copiedSnippet === 'c-var' ? <Check className="w-3 h-3 text-green" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedSnippet === 'c-var' ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                      </div>
+                      <pre className="docs-code-pre">{`let counter = 1;
+const step = 5;
 
-let user = {
-    username: "priyanshu",
-    role: "developer"
-};
+if (counter < 10) {
+    let message = "Inside block";
+    console.log(message);
+}
 
-let languages = ["C++17", "JavaScript", "Python"];
-console.log(name, version, user.username);`}</pre>
-                </div>
-              </div>
+counter = counter + step;
+console.log("Counter:", counter);`}</pre>
+                    </div>
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">Closures and Lexical Scope</h2>
-                <p className="docs-card-p">
-                  Inner functions maintain a pointer to their outer lexical environment, allowing closures to remember state across calls.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>closures.mjs</span></div>
-                  <pre className="docs-code-pre">{`function makeAdder(x) {
-    return function(y) {
-        return x + y;
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '20px 0 8px' }}>2. Functions & Closures</h3>
+                    <p className="docs-card-p">
+                      Functions are first-class values that can be passed into other functions or returned. Inner functions preserve access to variables declared in outer scopes.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header">
+                        <span>closures.mjs</span>
+                        <div className="docs-code-actions">
+                          <button onClick={() => handleOpenInPlayground(`function createBankAccount(initialBalance) {\n    let balance = initialBalance;\n    return {\n        deposit: function(amount) {\n            balance = balance + amount;\n            return balance;\n        },\n        getBalance: function() {\n            return balance;\n        }\n    };\n}\nlet account = createBankAccount(100);\nconsole.log("Deposited 50. Total:", account.deposit(50));\nconsole.log("Balance:", account.getBalance());`)} className="docs-code-btn">
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>Run in Playground</span>
+                          </button>
+                        </div>
+                      </div>
+                      <pre className="docs-code-pre">{`function createBankAccount(initialBalance) {
+    let balance = initialBalance;
+    
+    return {
+        deposit: function(amount) {
+            balance = balance + amount;
+            return balance;
+        },
+        withdraw: function(amount) {
+            if (amount > balance) return "Insufficient funds";
+            balance = balance - amount;
+            return balance;
+        },
+        getBalance: function() {
+            return balance;
+        }
     };
 }
 
-let addFive = makeAdder(5);
-console.log(addFive(10)); // 15
-console.log(addFive(20)); // 25`}</pre>
-                </div>
-              </div>
+let account = createBankAccount(100);
+console.log("Deposited 50. New balance:", account.deposit(50));
+console.log("Current balance:", account.getBalance());`}</pre>
+                    </div>
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">Classes and Inheritance</h2>
-                <p className="docs-card-p">
-                  Declare classes with constructors, methods, and inherit from other classes using <code>extends</code> and <code>super()</code>.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>classes.mjs</span></div>
-                  <pre className="docs-code-pre">{`class Shape {
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '20px 0 8px' }}>3. Classes & Inheritance</h3>
+                    <p className="docs-card-p">
+                      NanoJS supports ES6 class syntax with constructors, methods, and subclass inheritance via <code>extends</code> and <code>super()</code>.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header">
+                        <span>classes.mjs</span>
+                        <div className="docs-code-actions">
+                          <button onClick={() => handleOpenInPlayground(`class Animal {\n    constructor(name) {\n        this.name = name;\n    }\n    speak() {\n        return this.name + " makes a sound.";\n    }\n}\nclass Dog extends Animal {\n    constructor(name, breed) {\n        super(name);\n        this.breed = breed;\n    }\n    bark() {\n        return this.name + " (" + this.breed + ") says Woof!";\n    }\n}\nlet d = new Dog("Buddy", "Golden Retriever");\nconsole.log(d.speak());\nconsole.log(d.bark());`)} className="docs-code-btn">
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>Run in Playground</span>
+                          </button>
+                        </div>
+                      </div>
+                      <pre className="docs-code-pre">{`class Animal {
     constructor(name) {
         this.name = name;
     }
-    describe() {
-        return "Shape: " + this.name;
+    speak() {
+        return this.name + " makes a sound.";
     }
 }
 
-class Circle extends Shape {
-    constructor(radius) {
-        super("Circle");
-        this.radius = radius;
+class Dog extends Animal {
+    constructor(name, breed) {
+        super(name);
+        this.breed = breed;
     }
-    area() {
-        return 3.14159 * this.radius * this.radius;
+    bark() {
+        return this.name + " (" + this.breed + ") says Woof!";
     }
 }
 
-let c = new Circle(5);
-console.log(c.describe());
-console.log("Area:", c.area());`}</pre>
+let d = new Dog("Buddy", "Golden Retriever");
+console.log(d.speak());
+console.log(d.bark());`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '20px 0 8px' }}>4. Error Handling (try / catch / finally)</h3>
+                    <p className="docs-card-p">
+                      Exceptions unwinding works through the C++ call stack, safely transferring control to the nearest enclosing catch block.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>try_catch.mjs</span></div>
+                      <pre className="docs-code-pre">{`try {
+    console.log("Executing safe block...");
+    throw new Error("Validation failed for user");
+} catch (err) {
+    console.log("Caught expected error:", err.message);
+} finally {
+    console.log("Finally block runs regardless of errors!");
+}`}</pre>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* TAB 4: ASYNC & EVENT LOOP */}
-          {docsTab === 'async' && (
-            <div className="docs-content">
-              <div className="docs-card">
-                <h2 className="docs-card-title">Timers and Macrotasks</h2>
-                <p className="docs-card-p">
-                  NanoJS features non-blocking timers powered by a C++ priority queue using <code>std::chrono</code>.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>timers.mjs</span></div>
-                  <pre className="docs-code-pre">{`console.log("Step 1");
+              {/* CHAPTER 4: STANDARD LIBRARY */}
+              {docsChapter === 'builtins' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">Standard Library & Built-in Objects</h2>
+                    <p className="docs-card-p">
+                      NanoJS provides standard built-in objects directly available anywhere in your code.
+                    </p>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>1. The console Object</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>Console logging</span></div>
+                      <pre className="docs-code-pre">{`console.log("Standard output message");
+console.warn("Warning notice");
+console.error("Error notice");
+
+let user = { id: 101, username: "priyanshu" };
+console.log("User details:", user);`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>2. The Math Object</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>Math calculations</span></div>
+                      <pre className="docs-code-pre">{`console.log("PI:", Math.PI);
+console.log("Absolute value:", Math.abs(-42));
+console.log("Square root:", Math.sqrt(144));
+console.log("Power 2^8:", Math.pow(2, 8));
+console.log("Floor 4.9:", Math.floor(4.9));
+console.log("Ceil 4.1:", Math.ceil(4.1));
+console.log("Round 4.5:", Math.round(4.5));
+console.log("Max value:", Math.max(12, 88, 34));
+console.log("Min value:", Math.min(12, 88, 34));
+console.log("Random number between 0 and 1:", Math.random());`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>3. The JSON Object</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>JSON serialization</span></div>
+                      <pre className="docs-code-pre">{`let userObj = { name: "NanoJS", version: 1.0, active: true };
+
+// Convert object to JSON string
+let jsonString = JSON.stringify(userObj);
+console.log("Serialized JSON:", jsonString);
+
+// Parse JSON string back into object
+let parsedObj = JSON.parse(jsonString);
+console.log("Parsed name property:", parsedObj.name);`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>4. Array Methods (map, filter, reduce)</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>Array processing</span></div>
+                      <pre className="docs-code-pre">{`let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+let evens = numbers.filter(function(n) {
+    return n % 2 === 0;
+});
+
+let squared = evens.map(function(n) {
+    return n * n;
+});
+
+let sum = squared.reduce(function(acc, val) {
+    return acc + val;
+}, 0);
+
+console.log("Evens:", evens);
+console.log("Squared:", squared);
+console.log("Sum:", sum);`}</pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* CHAPTER 5: ASYNC & EVENT LOOP */}
+              {docsChapter === 'async' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">Asynchronous Runtime & Event Loop</h2>
+                    <p className="docs-card-p">
+                      NanoJS runs on a single main thread, using a non-blocking C++ event loop coordinator (<code>EventLoop.cpp</code>) to manage asynchronous timers and microtasks.
+                    </p>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>1. Timers (setTimeout, clearTimeout)</h3>
+                    <p className="docs-card-p">
+                      Timers are sorted by execution deadline using <code>std::chrono::steady_clock</code>.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>timers.mjs</span></div>
+                      <pre className="docs-code-pre">{`console.log("1. Start script");
+
+let timerId = setTimeout(function() {
+    console.log("This will not run because it gets cancelled!");
+}, 100);
+
+clearTimeout(timerId);
 
 setTimeout(function() {
-    console.log("Step 3 (after 50ms)");
+    console.log("3. Timer executed after 50ms");
 }, 50);
 
-console.log("Step 2");`}</pre>
-                </div>
-              </div>
+console.log("2. End of synchronous main frame");`}</pre>
+                    </div>
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">Async / Await and Promises</h2>
-                <p className="docs-card-p">
-                  Microtasks are processed immediately after current call frames finish, before the next timer event fires.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>async.mjs</span></div>
-                  <pre className="docs-code-pre">{`async function computeAsync() {
-    let value = await Promise.resolve(42);
-    return "The answer is " + value;
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>2. Promises & Microtasks</h3>
+                    <p className="docs-card-p">
+                      Promise microtasks run immediately when current call frames drain, before the next timer event fires.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>promises.mjs</span></div>
+                      <pre className="docs-code-pre">{`let promise = new Promise(function(resolve, reject) {
+    resolve("Data successfully fetched!");
+});
+
+promise.then(function(result) {
+    console.log("Promise resolved with:", result);
+});`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>3. Async / Await</h3>
+                    <p className="docs-card-p">
+                      The <code>async</code> and <code>await</code> keywords allow writing non-blocking asynchronous code with synchronous-looking syntax.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>async_await.mjs</span></div>
+                      <pre className="docs-code-pre">{`async function loadUserProfile() {
+    console.log("Fetching user profile...");
+    let user = await Promise.resolve({ id: 42, role: "Admin" });
+    return user;
 }
 
-computeAsync().then(function(msg) {
-    console.log(msg);
+loadUserProfile().then(function(user) {
+    console.log("Loaded user role:", user.role);
 });`}</pre>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* TAB 5: BUILT-IN GLOBALS */}
-          {docsTab === 'modules' && (
-            <div className="docs-content">
-              <div className="docs-card">
-                <h2 className="docs-card-title">File System (fs)</h2>
-                <p className="docs-card-p">
-                  The <code>fs</code> object is globally available without importing. Use it to read and write files directly.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>fs_example.mjs</span></div>
-                  <pre className="docs-code-pre">{`// Writing a file
-fs.writeFile("output.txt", "NanoJS wrote this file natively.");
+              {/* CHAPTER 6: FILE SYSTEM */}
+              {docsChapter === 'fs' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">File System API (fs)</h2>
+                    <p className="docs-card-p">
+                      NanoJS provides synchronous file I/O operations through the globally bound <code>fs</code> object. No module imports are needed.
+                    </p>
 
-// Reading a file
-let content = fs.readFile("output.txt");
-console.log("File content:", content);`}</pre>
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>1. Writing to a File</h3>
+                    <p className="docs-card-p">
+                      Use <code>fs.writeFile(filePath, content)</code> to create or overwrite a file.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>write_file.mjs</span></div>
+                      <pre className="docs-code-pre">{`let config = {
+    appName: "NanoApp",
+    version: "1.0.0",
+    port: 8080
+};
+
+fs.writeFile("config.json", JSON.stringify(config));
+console.log("Configuration file saved successfully!");`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>2. Reading from a File</h3>
+                    <p className="docs-card-p">
+                      Use <code>fs.readFile(filePath)</code> to read a file's entire content as a string.
+                    </p>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>read_file.mjs</span></div>
+                      <pre className="docs-code-pre">{`let rawContent = fs.readFile("config.json");
+console.log("Raw file content:", rawContent);
+
+let parsedConfig = JSON.parse(rawContent);
+console.log("Target port from file:", parsedConfig.port);`}</pre>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">HTTP Web Server (http)</h2>
-                <p className="docs-card-p">
-                  NanoJS includes a native POSIX/Winsock HTTP server for handling web requests.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>server.mjs</span></div>
-                  <pre className="docs-code-pre">{`let server = http.createServer(function(req, res) {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", engine: "NanoJS v1.0" }));
+              {/* CHAPTER 7: HTTP WEB SERVER */}
+              {docsChapter === 'http' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">HTTP Web Server (http)</h2>
+                    <p className="docs-card-p">
+                      NanoJS includes a native POSIX/Winsock HTTP server for building web services and JSON REST APIs.
+                    </p>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>1. Basic Web Server</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>server.mjs</span></div>
+                      <pre className="docs-code-pre">{`let server = http.createServer(function(req, res) {
+    console.log("Received request:", req.method, req.url);
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Hello from NanoJS native HTTP server!");
+});
+
+server.listen(8080);
+console.log("Server listening at http://localhost:8080/");`}</pre>
+                    </div>
+
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, margin: '18px 0 8px' }}>2. Building a JSON REST API Router</h3>
+                    <div className="docs-code-block">
+                      <div className="docs-code-header"><span>api_router.mjs</span></div>
+                      <pre className="docs-code-pre">{`let server = http.createServer(function(req, res) {
+    if (req.url === "/api/status") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "healthy", engine: "NanoJS v1.0" }));
+        return;
+    }
+
+    if (req.url === "/api/users") {
+        let users = [
+            { id: 1, name: "Alice" },
+            { id: 2, name: "Bob" }
+        ];
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(users));
+        return;
+    }
+
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Route not found" }));
 });
 
 server.listen(3000);
-console.log("Server listening on port 3000");`}</pre>
+console.log("API Server running at http://localhost:3000/");`}</pre>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="docs-card">
-                <h2 className="docs-card-title">JSON and Math Utilities</h2>
-                <p className="docs-card-p">
-                  Standard global utilities for parsing, serializing, and numeric calculations.
-                </p>
-                <div className="docs-code-block">
-                  <div className="docs-code-header"><span>utils.mjs</span></div>
-                  <pre className="docs-code-pre">{`let obj = { app: "NanoJS", stars: 100 };
-let jsonStr = JSON.stringify(obj);
-let parsed = JSON.parse(jsonStr);
+              {/* CHAPTER 8: CODE EXAMPLES */}
+              {docsChapter === 'examples' && (
+                <div>
+                  <div className="docs-card">
+                    <h2 className="docs-card-title">Runnable Code Examples</h2>
+                    <p className="docs-card-p">
+                      Every example below can be executed directly inside the online Playground with one click:
+                    </p>
 
-console.log("Parsed app:", parsed.app);
-console.log("Random number:", Math.random());
-console.log("Max value:", Math.max(10, 40, 25));`}</pre>
+                    {PRESETS.map((p, idx) => (
+                      <div key={p.id} style={{ marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>{p.title}</h3>
+                          <button
+                            onClick={() => handleOpenInPlayground(p.code)}
+                            className="docs-code-btn"
+                            style={{ background: 'var(--accent)', color: 'var(--bg)', padding: '5px 10px', fontWeight: 600 }}
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>Try in Playground</span>
+                          </button>
+                        </div>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 10px' }}>
+                          {p.description}
+                        </p>
+                        <div className="docs-code-block" style={{ margin: 0 }}>
+                          <pre className="docs-code-pre">{p.code}</pre>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
             </div>
-          )}
+          </div>
 
           <footer className="home-footer" style={{ marginTop: '48px' }}>
             <span>Built by Priyanshu Gaurav</span>
@@ -1282,12 +1492,12 @@ console.log("Max value:", Math.max(10, 40, 25));`}</pre>
               </button>
 
               <button
-                onClick={() => navigateTo('docs', null, 'differences')}
+                onClick={() => navigateTo('docs')}
                 className="pg-action-btn"
-                title="Differences from Node.js"
+                title="Documentation"
               >
-                <GitCompare className="w-3.5 h-3.5" />
-                <span>Differences</span>
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Docs</span>
               </button>
 
               <button
