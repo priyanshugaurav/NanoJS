@@ -3,10 +3,10 @@
 export const PRESETS = [
   {
     id: "closures",
-    title: "1. Closures & Lexical Scope Chain",
-    badge: "Memory & Env",
-    description: "Demonstrates how C++ shared_ptr<Environment> preserves variables across outer stack frames.",
-    code: `// NanoJS Closure & Lexical Environment Demo
+    title: "1. Closures & Scope",
+    badge: "Scope",
+    description: "Shows how nested functions remember variables from outer scopes.",
+    code: `// NanoJS Closure & Lexical Scope Demo
 function createCounter(initialValue, step) {
     let count = initialValue;
     
@@ -37,37 +37,35 @@ console.log("Counter B Current:", counterB.get());
   },
   {
     id: "eventloop",
-    title: "2. Async/Await & Event Loop Ticks",
-    badge: "Async Engine",
-    description: "Visualizes the non-blocking event loop, macrotask queue, and promise microtasks.",
-    code: `// NanoJS Event Loop & Microtask/Macrotask Demo
-console.log("1. [Synchronous] Script Execution Starts");
+    title: "2. Async/Await & Event Loop",
+    badge: "Async",
+    description: "Shows setTimeout timers and Promise microtasks running in order.",
+    code: `// NanoJS Event Loop & Microtask Demo
+console.log("1. Synchronous script start");
 
 setTimeout(function() {
-    console.log("4. [Macrotask] Timer 1 executed (delay: 20ms)");
+    console.log("4. Timer 1 finished (20ms)");
 }, 20);
 
 setTimeout(function() {
-    console.log("5. [Macrotask] Timer 2 executed (delay: 0ms)");
+    console.log("5. Timer 2 finished (0ms)");
 }, 0);
 
 async function performTask() {
-    console.log("2. [Synchronous] Inside async function body");
-    
-    // Simulate non-blocking microtask resolution
-    let result = await Promise.resolve("3. [Microtask] Promise resolved via await");
+    console.log("2. Inside async function");
+    let result = await Promise.resolve("3. Promise resolved via await");
     console.log(result);
 }
 
 performTask();
-console.log("=== End of Main Frame ===");
+console.log("Script end (event loop running...)");
 `
   },
   {
     id: "classes",
-    title: "3. Classes, Methods & Inheritance",
-    badge: "OOP Hierarchy",
-    description: "Showcases class declaration, constructor initialization, method delegation, and prototypes.",
+    title: "3. Classes & Inheritance",
+    badge: "OOP",
+    description: "Shows ES6 class syntax, constructors, methods, and super calls.",
     code: `// NanoJS Object-Oriented System
 class Vehicle {
     constructor(brand, speed) {
@@ -89,21 +87,22 @@ class SuperCar extends Vehicle {
 
     boost() {
         this.speed = this.speed + this.nitro;
-        return "🔥 Nitro Boosted! " + this.brand + " hit " + this.speed + " km/h!";
+        return "Nitro Boosted! " + this.brand + " hit " + this.speed + " km/h!";
     }
 }
 
 let gt = new SuperCar("NanoGT", 120, 80);
 console.log(gt.accelerate(40));
 console.log(gt.boost());
-console.log("Is instance of Vehicle?", gt instanceof Vehicle);
+console.log("Vehicle brand:", gt.brand);
+console.log("Current speed:", gt.speed);
 `
   },
   {
     id: "arrays_functional",
-    title: "4. Arrays & Higher-Order Functions",
-    badge: "Functional APIs",
-    description: "Demonstrates map, filter, and reduce chaining over dynamic ValuePtr collections.",
+    title: "4. Arrays & Built-in Methods",
+    badge: "Arrays",
+    description: "Shows map, filter, and reduce working over arrays.",
     code: `// NanoJS Array Processing
 let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -127,10 +126,10 @@ console.log("Sum:      ", sum);
   },
   {
     id: "recursion_stress",
-    title: "5. Deep Recursion & Call Stack",
-    badge: "Engine Stress",
-    description: "Tracks stack frames, call stack depth, and execution timing on algorithmic recursion.",
-    code: `// NanoJS Call Stack Depth & Algorithm Stress
+    title: "5. Recursion & Call Stack",
+    badge: "Stack",
+    description: "Computes Fibonacci numbers with recursive function calls.",
+    code: `// NanoJS Call Stack & Recursion
 function fibonacci(n) {
     if (n <= 1) return n;
     return fibonacci(n - 1) + fibonacci(n - 2);
@@ -144,9 +143,9 @@ for (let i = 0; i <= 10; i = i + 1) {
   },
   {
     id: "try_catch",
-    title: "6. Error Handling & Unwinding",
-    badge: "Exception Engine",
-    description: "Inspects stack unwinding and try/catch/finally block guarantees.",
+    title: "6. Error Handling & Try-Catch",
+    badge: "Errors",
+    description: "Catches thrown errors with try, catch, and finally blocks.",
     code: `// NanoJS Exception Handling
 function validateUser(age) {
     if (age < 0) {
@@ -166,9 +165,9 @@ try {
     console.log("Testing invalid user...");
     validateUser(-5);
 } catch (err) {
-    console.error("Caught expected exception:", err.message);
+    console.log("Caught expected error:", err.message);
 } finally {
-    console.log("Finally block executed regardless of exception!");
+    console.log("Finally block executed regardless of error!");
 }
 `
   }
