@@ -31,9 +31,12 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "Downloading $DOWNLOAD_FILE..."
 if command -v curl >/dev/null 2>&1; then
-  curl -sSL -o "$TMP_DIR/$DOWNLOAD_FILE" "https://nanojs.priyanshugaurav.space/downloads/$DOWNLOAD_FILE" || curl -sSL -o "$TMP_DIR/$DOWNLOAD_FILE" "https://raw.githubusercontent.com/priyanshugaurav/NanoJS/main/web/public/downloads/$DOWNLOAD_FILE"
+  curl -sSL -o "$TMP_DIR/$DOWNLOAD_FILE" "https://nanojs.priyanshugaurav.space/downloads/$DOWNLOAD_FILE" || \
+  curl -sSL -o "$TMP_DIR/$DOWNLOAD_FILE" "https://web-green-tau-32.vercel.app/downloads/$DOWNLOAD_FILE" || \
+  curl -sSL -o "$TMP_DIR/$DOWNLOAD_FILE" "https://raw.githubusercontent.com/priyanshugaurav/NanoJS/main/web/public/downloads/$DOWNLOAD_FILE"
 elif command -v wget >/dev/null 2>&1; then
-  wget -q -O "$TMP_DIR/$DOWNLOAD_FILE" "https://nanojs.priyanshugaurav.space/downloads/$DOWNLOAD_FILE"
+  wget -q -O "$TMP_DIR/$DOWNLOAD_FILE" "https://nanojs.priyanshugaurav.space/downloads/$DOWNLOAD_FILE" || \
+  wget -q -O "$TMP_DIR/$DOWNLOAD_FILE" "https://web-green-tau-32.vercel.app/downloads/$DOWNLOAD_FILE"
 fi
 
 tar -xzf "$TMP_DIR/$DOWNLOAD_FILE" -C "$TMP_DIR"
