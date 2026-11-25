@@ -1,6 +1,6 @@
 # Language Features
 
-This document covers all the JavaScript language features supported by the Mini-JS interpreter.
+This document covers all the JavaScript language features supported by the NanoJS interpreter.
 
 ## Table of Contents
 - [Variables](#variables)
@@ -16,7 +16,7 @@ This document covers all the JavaScript language features supported by the Mini-
 
 ## Variables
 
-Mini-JS supports all three variable declaration keywords:
+NanoJS supports all three variable declaration keywords:
 
 ### `let` - Block Scoped
 ```javascript

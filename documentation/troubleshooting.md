@@ -30,40 +30,36 @@ xcode-select --install
 # Install MinGW or use WSL
 ```
 
-### Error: Cannot find -lpthread
+### Error: Compilation or Linker Failure
 
-**Problem:** Missing pthread library (Linux/Mac only)
-
-**Solution:**
-```bash
-# Make sure you include -lpthread flag
-g++ -std=c++17 -o mini_js src/Interpreter.cpp -lpthread
-```
-
-### Error: ws2_32.lib not found (Windows)
-
-**Problem:** Missing Windows socket library
+**Problem:** Missing source files or incorrect compiler flags
 
 **Solution:**
 ```bash
-# Make sure you include -lws2_32 flag
-g++ -std=c++17 -o mini_js.exe src/Interpreter.cpp -lws2_32
+# macOS
+clang++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs
+
+# Linux
+g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs
+
+# Windows (MinGW)
+g++ -std=c++17 -O3 -Iinclude src/*.cpp src/runtime/*.cpp -o nanojs.exe -lws2_32
 ```
 
 ### Build succeeds but executable doesn't run
 
-**Problem:** Wrong architecture or missing dependencies
+**Problem:** Permission or execution path issue
 
 **Solution:**
 ```bash
 # Check if executable was created
-ls -l mini_js
+ls -l nanojs
 
-# Try running with full path
-./mini_js
+# Give executable permissions (Linux/macOS)
+chmod +x nanojs
 
-# Check permissions (Linux/Mac)
-chmod +x mini_js
+# Run with a .mjs file
+./nanojs script.mjs
 ```
 
 ---
@@ -609,10 +605,10 @@ async function retry(fn, maxAttempts = 3) {
 ### File must end with .mjs
 ```bash
 # Correct
-./mini_js app.mjs
+./nanojs app.mjs
 
 # Wrong
-./mini_js app.js
+./nanojs app.js
 ```
 
 ### Always await async functions

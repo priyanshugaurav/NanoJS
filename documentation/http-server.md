@@ -285,7 +285,7 @@ function serveWebsite(req, res) {
           <a href="/contact">Contact</a>
         </nav>
         <h1>Welcome to My Website</h1>
-        <p>This is a simple website built with Mini-JS!</p>
+        <p>This is a simple website built with NanoJS!</p>
       </body>
       </html>
     `);
@@ -582,7 +582,7 @@ const server = http.createServer((req, res) => {
   if (req.url === '/') {
     res.end(servePage('Home', `
       <h2>Welcome!</h2>
-      <p>This is a fully styled website served by Mini-JS.</p>
+      <p>This is a fully styled website served by NanoJS.</p>
       <p>Navigate using the menu above to explore different pages.</p>
     `));
   } else if (req.url === '/about') {

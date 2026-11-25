@@ -1,6 +1,6 @@
 # Quick Reference
 
-A quick reference guide for Mini-JS syntax and features.
+A quick reference guide for NanoJS syntax and features.
 
 ## Variables
 

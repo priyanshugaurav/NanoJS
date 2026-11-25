@@ -1,6 +1,6 @@
 # Built-in Objects
 
-Mini-JS provides several built-in objects similar to standard JavaScript.
+NanoJS provides several built-in objects similar to standard JavaScript.
 
 ## Table of Contents
 - [Console](#console)
@@ -312,7 +312,7 @@ let merged = Object.assign({}, obj1, obj2, obj3);
 
 ## Array Methods
 
-Arrays in Mini-JS support many useful methods.
+Arrays in NanoJS support many useful methods.
 
 ### push() & pop()
 ```javascript

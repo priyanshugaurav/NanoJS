@@ -1,6 +1,6 @@
 # Code Examples
 
-Complete examples to help you learn and build with Mini-JS.
+Complete examples to help you learn and build with NanoJS.
 
 ## Table of Contents
 - [Hello World](#hello-world)
@@ -25,7 +25,7 @@ console.log("Hello, World!");
 
 Run it:
 ```bash
-./mini_js hello.mjs
+./nanojs hello.mjs
 ```
 
 Output:
